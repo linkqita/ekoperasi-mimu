@@ -1,7 +1,7 @@
 :root {
-  --primary: #1e3a8a;       /* Navy Blue Elegan */
-  --primary-dark: #1e293b;  /* Slate Gelap */
-  --accent: #d97706;        /* Gold / Amber */
+  --primary: #1e3a8a;
+  --primary-dark: #1e293b;
+  --accent: #d97706;
   --bg: #f8fafc;
   --card: #ffffff;
   --text: #1e293b;
@@ -91,6 +91,13 @@ body { background: var(--bg); color: var(--text); line-height: 1.6; }
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
 .modal-content { background: var(--card); padding: 30px; border-radius: 16px; width: 100%; max-width: 400px; position: relative; }
 .close { position: absolute; top: 15px; right: 20px; font-size: 22px; cursor: pointer; color: var(--text-muted); }
+
+/* ADMIN LIST ITEMS */
+.admin-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; background: #fff; }
+.admin-item:last-child { border-bottom: none; }
+.admin-item-actions { display: flex; gap: 6px; }
+.admin-item-actions button { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: #f8fafc; }
+.admin-item-actions button.del { color: #dc2626; border-color: #fca5a5; }
 
 @media(max-width: 768px) {
   .hero-grid, .contact-grid { grid-template-columns: 1fr; }
