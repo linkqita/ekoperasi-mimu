@@ -18,24 +18,57 @@ const DEFAULT_SAVINGS = [
   { id: 6, nis: "1006", name: "Aisyah Putri", class: "Kelas 6", balance: 425000, lastUpdate: "15 Okt 2026" }
 ];
 
+const DEFAULT_SETTINGS = {
+  whatsapp: "6281234567890",
+  address: "Komplek MI Miftahul Ulum Kebotohan, Kec. Suradadi, Kab. Tegal",
+  jam1: "Senin – Kamis: 07.30 - 13.00 WIB",
+  jam2: "Jumat – Sabtu: 07.30 - 11.00 WIB",
+  email: "koperasi.mimu@gmail.com"
+};
+
 function getProducts() {
   const data = localStorage.getItem('mimu_products');
   return data ? JSON.parse(data) : DEFAULT_PRODUCTS;
 }
-function saveProducts(arr) {
-  localStorage.setItem('mimu_products', JSON.stringify(arr));
-}
+function saveProducts(arr) { localStorage.setItem('mimu_products', JSON.stringify(arr)); }
 
 function getSavings() {
   const data = localStorage.getItem('mimu_savings');
   return data ? JSON.parse(data) : DEFAULT_SAVINGS;
 }
-function saveSavings(arr) {
-  localStorage.setItem('mimu_savings', JSON.stringify(arr));
+function saveSavings(arr) { localStorage.setItem('mimu_savings', JSON.stringify(arr)); }
+
+function getSettings() {
+  const data = localStorage.getItem('mimu_settings');
+  return data ? JSON.parse(data) : DEFAULT_SETTINGS;
 }
+function saveSettingsObj(obj) { localStorage.setItem('mimu_settings', JSON.stringify(obj)); }
 
 function formatRupiah(num) {
   return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+// Inisialisasi Tampilan Dinamis Berdasarkan Settings
+function applySettings() {
+  const s = getSettings();
+  
+  // WhatsApp Hero & Kontak
+  const waBtn = document.getElementById('heroWaBtn');
+  if (waBtn) {
+    waBtn.href = `https://wa.me/${s.whatsapp}?text=Halo%20Koperasi%20MIMU%20Kebotohan,%20saya%20mau%20tanya...`;
+  }
+  
+  const infoJam1 = document.getElementById('infoJam1');
+  const infoJam2 = document.getElementById('infoJam2');
+  if (infoJam1) infoJam1.textContent = s.jam1;
+  if (infoJam2) infoJam2.textContent = s.jam2;
+
+  const infoAlamat = document.getElementById('infoAlamat');
+  const infoWaText = document.getElementById('infoWaText');
+  const infoEmail = document.getElementById('infoEmail');
+  if (infoAlamat) infoAlamat.innerHTML = `📍 <strong>Lokasi:</strong> ${s.address}`;
+  if (infoWaText) infoWaText.innerHTML = `📱 <strong>WhatsApp:</strong> +${s.whatsapp.replace(/(\d{2})(\d{3})(\d{4})(\d+)/, '$1 $2-$3-$4')}`;
+  if (infoEmail) infoEmail.innerHTML = `✉️ <strong>Email:</strong> ${s.email}`;
 }
 
 // Render Katalog Produk
@@ -43,6 +76,7 @@ function renderProducts(filter = 'semua') {
   const grid = document.getElementById('productGrid');
   if (!grid) return;
   const products = getProducts();
+  const s = getSettings();
   const filtered = filter === 'semua' ? products : products.filter(p => p.category === filter);
   
   grid.innerHTML = filtered.map(p => `
@@ -56,7 +90,7 @@ function renderProducts(filter = 'semua') {
         </div>
         <div class="product-footer">
           <span>Stok: <strong>${p.stock}</strong></span>
-          <a href="https://wa.me/6281234567890?text=Halo%20Koperasi,%20saya%20mau%20pesan%20${encodeURIComponent(p.name)}%20harga%20${p.price}" target="_blank" class="btn btn-primary" style="padding:6px 12px; font-size:12px;">Pesan WA</a>
+          <a href="https://wa.me/${s.whatsapp}?text=Halo%20Koperasi,%20saya%20mau%20pesan%20${encodeURIComponent(p.name)}%20harga%20${p.price}" target="_blank" class="btn btn-primary" style="padding:6px 12px; font-size:12px;">Pesan WA</a>
         </div>
       </div>
     </div>
@@ -117,6 +151,7 @@ window.doLogin = function() {
     document.getElementById('loginView').style.display = 'none';
     document.getElementById('adminDashboard').style.display = 'block';
     renderAdminLists();
+    loadSettingsForm();
   } else {
     alert('Sandi salah! Gunakan admin123');
   }
@@ -129,21 +164,50 @@ window.doLogout = function() {
 };
 
 window.switchTab = function(tab) {
-  if (tab === 'products') {
-    document.getElementById('adminTabProducts').style.display = 'block';
-    document.getElementById('adminTabSavings').style.display = 'none';
-    document.getElementById('tabBtnProducts').className = 'btn btn-primary';
-    document.getElementById('tabBtnSavings').className = 'btn btn-outline';
-    document.getElementById('tabBtnSavings').style.color = 'var(--text)';
-    document.getElementById('tabBtnSavings').style.borderColor = 'var(--border)';
-  } else {
-    document.getElementById('adminTabProducts').style.display = 'none';
-    document.getElementById('adminTabSavings').style.display = 'block';
-    document.getElementById('tabBtnSavings').className = 'btn btn-primary';
-    document.getElementById('tabBtnProducts').className = 'btn btn-outline';
-    document.getElementById('tabBtnProducts').style.color = 'var(--text)';
-    document.getElementById('tabBtnProducts').style.borderColor = 'var(--border)';
-  }
+  const p = document.getElementById('adminTabProducts');
+  const s = document.getElementById('adminTabSavings');
+  const set = document.getElementById('adminTabSettings');
+  
+  p.style.display = tab === 'products' ? 'block' : 'none';
+  s.style.display = tab === 'savings' ? 'block' : 'none';
+  set.style.display = tab === 'settings' ? 'block' : 'none';
+
+  document.getElementById('tabBtnProducts').className = tab === 'products' ? 'btn btn-primary' : 'btn btn-outline';
+  document.getElementById('tabBtnSavings').className = tab === 'savings' ? 'btn btn-primary' : 'btn btn-outline';
+  document.getElementById('tabBtnSettings').className = tab === 'settings' ? 'btn btn-primary' : 'btn btn-outline';
+
+  ['tabBtnProducts', 'tabBtnSavings', 'tabBtnSettings'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.classList.contains('btn-primary')) {
+      el.style.color = 'var(--text)';
+      el.style.borderColor = 'var(--border)';
+    }
+  });
+};
+
+// Load settings to form
+function loadSettingsForm() {
+  const s = getSettings();
+  document.getElementById('setCabinWa').value = s.whatsapp;
+  document.getElementById('setAddress').value = s.address;
+  document.getElementById('setJam1').value = s.jam1;
+  document.getElementById('setJam2').value = s.jam2;
+  document.getElementById('setEmail').value = s.email;
+}
+
+window.saveSettings = function(e) {
+  e.preventDefault();
+  const s = {
+    whatsapp: document.getElementById('setCabinWa').value.trim(),
+    address: document.getElementById('setAddress').value.trim(),
+    jam1: document.getElementById('setJam1').value.trim(),
+    jam2: document.getElementById('setJam2').value.trim(),
+    email: document.getElementById('setEmail').value.trim()
+  };
+  saveSettingsObj(s);
+  applySettings();
+  renderProducts();
+  alert('Pengaturan madrasah berhasil disimpan!');
 };
 
 // Render Admin Lists
@@ -259,14 +323,17 @@ window.deleteSavings = function(id) {
 };
 
 window.resetAllData = function() {
-  if (confirm('Reset seluruh produk dan tabungan ke data bawaan?')) {
+  if (confirm('Reset seluruh produk, tabungan, dan pengaturan ke data bawaan?')) {
     localStorage.removeItem('mimu_products');
     localStorage.removeItem('mimu_savings');
+    localStorage.removeItem('mimu_settings');
+    applySettings();
     renderProducts();
     renderAdminLists();
-    alert('Data direset.');
+    alert('Data berhasil direset.');
   }
 };
 
 // Init
+applySettings();
 renderProducts();
