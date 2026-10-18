@@ -22,7 +22,7 @@
         <a href="#katalog">Katalog & Harga</a>
         <a href="#tabungan">Cek Tabungan</a>
         <a href="#kontak">Kontak</a>
-        <button class="btn-admin" id="btnAdminModal">Admin Login</button>
+        <button class="btn-admin" id="btnAdminModal">🔐 Login Admin</button>
       </nav>
     </div>
   </header>
@@ -61,7 +61,7 @@
     </div>
 
     <div class="filter-bar">
-      <button class="filter-btn active" data-filter=" semua">Semua Barang</button>
+      <button class="filter-btn active" data-filter="semua">Semua Barang</button>
       <button class="filter-btn" data-filter="seragam">Seragam & Atribut</button>
       <button class="filter-btn" data-filter="buku">Buku & LKS</button>
       <button class="filter-btn" data-filter="atk">Alat Tulis</button>
@@ -82,7 +82,7 @@
 
       <div class="search-box-card">
         <div class="search-input-group">
-          <input type="text" id="nisInput" placeholder="Masukkan Nomor NIS atau Nama Siswa (contoh: 1024 atau Ahmad)...">
+          <input type="text" id="nisInput" placeholder="Masukkan Nomor NIS atau Nama Siswa (contoh: 1001 atau Ahmad)...">
           <button class="btn btn-primary" id="btnCekTabungan">Cek Saldo</button>
         </div>
         <div class="search-result" id="searchResult">
@@ -118,21 +118,73 @@
     </div>
   </footer>
 
-  <!-- MODAL ADMIN LOGIN -->
+  <!-- MODAL ADMIN LOGIN & CMS -->
   <div class="modal" id="adminModal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 650px; max-height: 90vh; overflow-y: auto;">
       <span class="close" id="closeModal">&times;</span>
-      <h2>Panel Admin Koperasi</h2>
-      <p>Masukkan sandi pengurus untuk mengelola produk dan tabungan.</p>
-      <div id="loginForm">
+      
+      <!-- Form Login -->
+      <div id="loginView">
+        <h2>🔐 Login Panel Admin</h2>
+        <p>Masukkan sandi pengurus koperasi.</p>
         <input type="password" id="adminPass" placeholder="Sandi (default: admin123)" style="width:100%; padding:10px; margin:12px 0; border:1px solid #cbd5e1; border-radius:8px;">
         <button class="btn btn-primary" id="btnLogin" style="width:100%;">Masuk Admin</button>
       </div>
-      <div id="adminPanel" style="display:none;">
-        <hr style="margin:16px 0; border:0; border-top:1px solid #e2e8f0;">
-        <h3>⚙️ Kelola Data Produk</h3>
-        <button class="btn btn-outline" id="btnResetData" style="margin-top:8px; font-size:12px;">Reset Data ke Default</button>
-        <p style="font-size:12px; color:#64748b; margin-top:8px;">Panel admin penuh dapat diakses via mode editor lokal.</p>
+
+      <!-- Dashboard CMS -->
+      <div id="adminDashboard" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2>⚙️ Panel Pengelola Koperasi</h2>
+          <button class="btn btn-outline" id="btnLogoutAdmin" style="background:#ef4444; border:none; padding:4px 10px; font-size:12px;">Keluar</button>
+        </div>
+
+        <div class="admin-tabs" style="display:flex; gap:8px; margin-bottom:16px;">
+          <button class="btn btn-primary" id="tabBtnProducts" style="flex:1; padding:8px; font-size:13px;">Kelola Produk</button>
+          <button class="btn btn-outline" id="tabBtnSavings" style="flex:1; padding:8px; font-size:13px; color:var(--text); border-color:var(--border);">Kelola Tabungan Siswa</button>
+        </div>
+
+        <!-- TAB 1: KELOLA PRODUK -->
+        <div id="adminTabProducts">
+          <h3 style="font-size:15px; margin-bottom:8px;">Tambah / Edit Produk</h3>
+          <form id="productForm" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px; background:#f8fafc; padding:14px; border-radius:8px;">
+            <input type="hidden" id="prodId">
+            <input type="text" id="prodName" placeholder="Nama Barang" required style="grid-column: span 2; padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <select id="prodCategory" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+              <option value="seragam">Seragam & Atribut</option>
+              <option value="buku">Buku & LKS</option>
+              <option value="atk">Alat Tulis</option>
+            </select>
+            <input type="number" id="prodPrice" placeholder="Harga (Rp)" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <select id="prodStock" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+              <option value="Tersedia">Tersedia</option>
+              <option value="Habis">Habis</option>
+            </select>
+            <input type="text" id="prodIcon" placeholder="Ikon Emoji (contoh: 👕)" value="📦" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <button type="submit" class="btn btn-primary" style="grid-column: span 2; padding:8px;">Simpan Produk</button>
+          </form>
+
+          <h3 style="font-size:15px; margin-bottom:8px;">Daftar Produk Saat Ini</h3>
+          <div id="adminProductList" style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px;"></div>
+        </div>
+
+        <!-- TAB 2: KELOLA TABUNGAN -->
+        <div id="adminTabSavings" style="display:none;">
+          <h3 style="font-size:15px; margin-bottom:8px;">Tambah / Edit Tabungan Siswa</h3>
+          <form id="savingsForm" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px; background:#f8fafc; padding:14px; border-radius:8px;">
+            <input type="text" id="savNis" placeholder="Nomor NIS" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <input type="text" id="savName" placeholder="Nama Siswa" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <input type="text" id="savClass" placeholder="Kelas (contoh: Kelas 1)" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <input type="number" id="savBalance" placeholder="Saldo (Rp)" required style="padding:8px; border:1px solid var(--border); border-radius:6px;">
+            <button type="submit" class="btn btn-primary" style="grid-column: span 2; padding:8px;">Simpan Data Siswa</button>
+          </form>
+
+          <h3 style="font-size:15px; margin-bottom:8px;">Daftar Tabungan Siswa</h3>
+          <div id="adminSavingsList" style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px;"></div>
+        </div>
+
+        <div style="margin-top:20px; text-align:right;">
+          <button class="btn btn-outline" id="btnResetAll" style="background:#fee2e2; color:#b91c1c; border:none; font-size:12px; padding:6px 12px;">Reset Semua ke Default</button>
+        </div>
       </div>
     </div>
   </div>
