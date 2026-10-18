@@ -41,6 +41,7 @@ function formatRupiah(num) {
 // Render Katalog Produk
 function renderProducts(filter = 'semua') {
   const grid = document.getElementById('productGrid');
+  if (!grid) return;
   const products = getProducts();
   const filtered = filter === 'semua' ? products : products.filter(p => p.category === filter);
   
@@ -62,17 +63,14 @@ function renderProducts(filter = 'semua') {
   `).join('');
 }
 
-// Filter button events
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    renderProducts(e.target.getAttribute('data-filter').trim());
-  });
-});
+window.filterCat = function(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts(cat);
+};
 
 // Cek Tabungan
-document.getElementById('btnCekTabungan').addEventListener('click', () => {
+window.cekTabungan = function() {
   const query = document.getElementById('nisInput').value.trim().toLowerCase();
   const resultDiv = document.getElementById('searchResult');
   
@@ -102,19 +100,18 @@ document.getElementById('btnCekTabungan').addEventListener('click', () => {
       </div>
     `;
   }
-});
+};
 
-// Modal Admin
-const modal = document.getElementById('adminModal');
-document.getElementById('btnAdminModal').addEventListener('click', () => modal.style.display = 'flex');
-document.getElementById('closeModal').addEventListener('click', () => modal.style.display = 'none');
-document.getElementById('btnLogoutAdmin').addEventListener('click', () => {
-  document.getElementById('loginView').style.display = 'block';
-  document.getElementById('adminDashboard').style.display = 'none';
-  document.getElementById('adminPass').value = '';
-});
+// Modal Admin Global Functions
+window.openAdminModal = function() {
+  document.getElementById('adminModal').style.display = 'flex';
+};
 
-document.getElementById('btnLogin').addEventListener('click', () => {
+window.closeAdminModal = function() {
+  document.getElementById('adminModal').style.display = 'none';
+};
+
+window.doLogin = function() {
   const pass = document.getElementById('adminPass').value;
   if (pass === 'admin123') {
     document.getElementById('loginView').style.display = 'none';
@@ -123,30 +120,34 @@ document.getElementById('btnLogin').addEventListener('click', () => {
   } else {
     alert('Sandi salah! Gunakan admin123');
   }
-});
+};
 
-// Tab Switch Admin
-document.getElementById('tabBtnProducts').addEventListener('click', () => {
-  document.getElementById('adminTabProducts').style.display = 'block';
-  document.getElementById('adminTabSavings').style.display = 'none';
-  document.getElementById('tabBtnProducts').className = 'btn btn-primary';
-  document.getElementById('tabBtnSavings').className = 'btn btn-outline';
-  document.getElementById('tabBtnSavings').style.color = 'var(--text)';
-  document.getElementById('tabBtnSavings').style.borderColor = 'var(--border)';
-});
+window.doLogout = function() {
+  document.getElementById('loginView').style.display = 'block';
+  document.getElementById('adminDashboard').style.display = 'none';
+  document.getElementById('adminPass').value = '';
+};
 
-document.getElementById('tabBtnSavings').addEventListener('click', () => {
-  document.getElementById('adminTabProducts').style.display = 'none';
-  document.getElementById('adminTabSavings').style.display = 'block';
-  document.getElementById('tabBtnSavings').className = 'btn btn-primary';
-  document.getElementById('tabBtnProducts').className = 'btn btn-outline';
-  document.getElementById('tabBtnProducts').style.color = 'var(--text)';
-  document.getElementById('tabBtnProducts').style.borderColor = 'var(--border)';
-});
+window.switchTab = function(tab) {
+  if (tab === 'products') {
+    document.getElementById('adminTabProducts').style.display = 'block';
+    document.getElementById('adminTabSavings').style.display = 'none';
+    document.getElementById('tabBtnProducts').className = 'btn btn-primary';
+    document.getElementById('tabBtnSavings').className = 'btn btn-outline';
+    document.getElementById('tabBtnSavings').style.color = 'var(--text)';
+    document.getElementById('tabBtnSavings').style.borderColor = 'var(--border)';
+  } else {
+    document.getElementById('adminTabProducts').style.display = 'none';
+    document.getElementById('adminTabSavings').style.display = 'block';
+    document.getElementById('tabBtnSavings').className = 'btn btn-primary';
+    document.getElementById('tabBtnProducts').className = 'btn btn-outline';
+    document.getElementById('tabBtnProducts').style.color = 'var(--text)';
+    document.getElementById('tabBtnProducts').style.borderColor = 'var(--border)';
+  }
+};
 
 // Render Admin Lists
 function renderAdminLists() {
-  // Produk List
   const prodList = document.getElementById('adminProductList');
   const products = getProducts();
   prodList.innerHTML = products.length ? products.map(p => `
@@ -157,9 +158,8 @@ function renderAdminLists() {
         <button class="del" onclick="deleteProduct(${p.id})">Hapus</button>
       </div>
     </div>
-  `).join('') : '<p style="padding:10px; font-size:12px; color:#88pK">Belum ada produk.</p>';
+  `).join('') : '<p style="padding:10px; font-size:12px;">Belum ada produk.</p>';
 
-  // Savings List
   const savList = document.getElementById('adminSavingsList');
   const savings = getSavings();
   savList.innerHTML = savings.length ? savings.map(s => `
@@ -174,7 +174,7 @@ function renderAdminLists() {
 }
 
 // Submit Produk
-document.getElementById('productForm').addEventListener('submit', (e) => {
+window.saveProductItem = function(e) {
   e.preventDefault();
   const id = document.getElementById('prodId').value;
   const name = document.getElementById('prodName').value;
@@ -196,7 +196,7 @@ document.getElementById('productForm').addEventListener('submit', (e) => {
   e.target.reset();
   document.getElementById('prodId').value = '';
   alert('Produk berhasil disimpan!');
-});
+};
 
 window.editProduct = function(id) {
   const p = getProducts().find(x => x.id == id);
@@ -219,7 +219,7 @@ window.deleteProduct = function(id) {
 };
 
 // Submit Tabungan
-document.getElementById('savingsForm').addEventListener('submit', (e) => {
+window.saveSavingsItem = function(e) {
   e.preventDefault();
   const nis = document.getElementById('savNis').value;
   const name = document.getElementById('savName').value;
@@ -258,7 +258,7 @@ window.deleteSavings = function(id) {
   }
 };
 
-document.getElementById('btnResetAll').addEventListener('click', () => {
+window.resetAllData = function() {
   if (confirm('Reset seluruh produk dan tabungan ke data bawaan?')) {
     localStorage.removeItem('mimu_products');
     localStorage.removeItem('mimu_savings');
@@ -266,7 +266,7 @@ document.getElementById('btnResetAll').addEventListener('click', () => {
     renderAdminLists();
     alert('Data direset.');
   }
-});
+};
 
 // Init
 renderProducts();
